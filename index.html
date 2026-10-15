@@ -15,10 +15,11 @@ label b{color:#fff}
 label.k{flex-direction:row;align-items:center;gap:10px;color:#fff}
 input[type=range]{width:100%;accent-color:#8b7cf6}
 select,button{font:inherit;padding:12px;border-radius:99px;background:var(--c);color:#fff;border:0}
+#rec{position:fixed;left:50%;top:8px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#f33;box-shadow:0 0 6px #f33;display:none;z-index:100;pointer-events:none}
 #go{background:#fff;color:#16141c;font-weight:700}
 .row{display:flex;gap:10px}.row button{flex:1}
 </style></head><body>
-<canvas id="c"></canvas><video id="v" playsinline muted autoplay></video><pre id="diag"></pre>
+<canvas id="c"></canvas><video id="v" playsinline muted autoplay></video><pre id="diag"></pre><div id="rec"></div>
 <button id="gear">⚙</button>
 <main id="menu"><h1>VisionS°MR</h1>
 <p>Home em realidade mista para óculos VR Box. Coloque o celular nos óculos depois de tocar em Entrar.</p>
@@ -36,8 +37,9 @@ select,button{font:inherit;padding:12px;border-radius:99px;background:var(--c);c
 <div class="row"><button id="rc">Recentralizar</button></div>
 <button id="wd">Alternar câmera / piscina</button>
 <button id="rcam">Reiniciar câmera</button>
+<button id="sv" style="display:none">Salvar última gravação na galeria</button>
 <button id="go">Entrar</button>
-<p>Pinça, punho fechado ou cutucar com o indicador sobre um ícone abre o app. No Google, aponte para as letras do teclado e faça pinça ou cutuque. Com um app aberto, segure a pinça na barra branca e olhe para onde quer a janela, ou segure no círculo do canto e olhe para onde quer o canto. Faça 🤙 (shaka) por meio segundo para alternar entre a câmera e a piscina. Sem mão: olhe para o ícone e toque na tela.</p></main>
+<p>Pinça, punho fechado ou cutucar com o indicador sobre um ícone abre o app. No Google, aponte para as letras do teclado e faça pinça ou cutuque. Com um app aberto, segure a pinça na barra branca e olhe para onde quer a janela, ou segure no círculo do canto e olhe para onde quer o canto. Faça 🤙 (shaka) por meio segundo para alternar entre a câmera e a piscina. Faça 👈 (indicador apontando para a esquerda) por meio segundo para começar a gravar a tela; faça de novo para parar e salvar. Sem mão: olhe para o ícone e toque na tela.</p></main>
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
@@ -530,11 +532,12 @@ avMe.position.copy(head.position).addScaledVector(avR,-.9+rx*.8).addScaledVector
 avMe.rotation.set(-ry*.8,-y,-rx*1.2)}
 /* som */
 let AC=null;
+let AO=null;function ao(){if(!AO){AO=AC.createGain();AO.connect(AC.destination)}return AO}
 function snd(k){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();if(!k)return;const t=AC.currentTime;
 if(k==='hit'){const n=AC.createBuffer(1,Math.floor(AC.sampleRate*.05),AC.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,3);
-const ns=AC.createBufferSource();ns.buffer=n;const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=2200;const ng=AC.createGain();ng.gain.value=.55;ns.connect(bp);bp.connect(ng);ng.connect(AC.destination);ns.start(t);
-const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.setValueAtTime(950,t);o.frequency.exponentialRampToValueAtTime(380,t+.07);g.gain.setValueAtTime(.6,t);g.gain.exponentialRampToValueAtTime(.001,t+.1);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+.11)}
-else{[0,.12].forEach((dl,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=i?660:520;g.gain.setValueAtTime(.0001,t+dl);g.gain.exponentialRampToValueAtTime(.3,t+dl+.02);g.gain.exponentialRampToValueAtTime(.001,t+dl+.18);o.connect(g);g.connect(AC.destination);o.start(t+dl);o.stop(t+dl+.2)})}}catch(e){}}
+const ns=AC.createBufferSource();ns.buffer=n;const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=2200;const ng=AC.createGain();ng.gain.value=.55;ns.connect(bp);bp.connect(ng);ng.connect(ao());ns.start(t);
+const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.setValueAtTime(950,t);o.frequency.exponentialRampToValueAtTime(380,t+.07);g.gain.setValueAtTime(.6,t);g.gain.exponentialRampToValueAtTime(.001,t+.1);o.connect(g);g.connect(ao());o.start(t);o.stop(t+.11)}
+else{[0,.12].forEach((dl,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=i?660:520;g.gain.setValueAtTime(.0001,t+dl);g.gain.exponentialRampToValueAtTime(.3,t+dl+.02);g.gain.exponentialRampToValueAtTime(.001,t+dl+.18);o.connect(g);g.connect(ao());o.start(t+dl);o.stop(t+dl+.2)})}}catch(e){}}
 addEventListener('pointerdown',()=>snd(''),{passive:true});
 
 function ppBtns(){if(PP.st==='menu')return[
@@ -651,6 +654,37 @@ p.on('open',()=>{const c=p.connect('vsmr-pong-'+code,{serialization:'json'});PP.
 c.on('open',()=>startGame('guest'));c.on('data',ppData);c.on('close',ppLost);
 setTimeout(()=>{if(PP.st==='mp'&&PP.conn===c&&!c.open){PP.stat='Não foi possível conectar';ppDraw()}},10000)});
 p.on('error',e=>{PP.stat=e.type==='peer-unavailable'?'Código não encontrado':'Erro: '+e.type;ppDraw()})}
+
+/* gravação de tela (uma tela só, sem divisão) */
+let recOn=false,recMR=null,recChunks=[],recBlob=null,recName='',recT=0,recCool=0,recRT=null,recBuf=null,recCv=null,recCx=null,recId=null,recN=0,recW=2,recH=2,recDest=null;
+const[recS,recM]=quad('uniform sampler2D t;varying vec2 v;void main(){gl_FragColor=vec4(texture2D(t,vec2(v.x*.5,v.y)).rgb,1.);}',{t:{value:null}});
+function recFrame(){if(!recOn||!recRT)return;recN++;if(recN&1)return;
+recM.uniforms.t.value=rt.texture;
+R.setRenderTarget(recRT);R.setScissorTest(false);R.setViewport(0,0,recW,recH);R.render(recS,bgC);R.readRenderTargetPixels(recRT,0,0,recW,recH,recBuf);
+const d=recId.data,rw4=recW*4;for(let y=0;y<recH;y++){const sr=(recH-1-y)*rw4;d.set(recBuf.subarray(sr,sr+rw4),y*rw4)}
+recCx.putImageData(recId,0,0)}
+function toggleRec(){recOn?stopRec():startRec()}
+function startRec(){if(recOn)return;if(typeof MediaRecorder==='undefined'||!HTMLCanvasElement.prototype.captureStream){say('Gravação não suportada');return}
+try{recW=Math.min(960,PW>>1);recH=Math.max(2,Math.round(recW*PH/(PW>>1)));
+if(!recCv){recCv=document.createElement('canvas');recCx=recCv.getContext('2d')}
+recCv.width=recW;recCv.height=recH;recId=recCx.createImageData(recW,recH);recBuf=new Uint8Array(recW*recH*4);
+if(recRT)recRT.dispose();recRT=new THREE.WebGLRenderTarget(recW,recH,{minFilter:LF,magFilter:LF,depthBuffer:false});
+const st=recCv.captureStream(30);
+try{if(AC){recDest=AC.createMediaStreamDestination();ao().connect(recDest);recDest.stream.getAudioTracks().forEach(t=>st.addTrack(t))}}catch(e){}
+const mt=['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));
+recMR=new MediaRecorder(st,mt?{mimeType:mt,videoBitsPerSecond:4000000}:{videoBitsPerSecond:4000000});recChunks=[];
+recMR.ondataavailable=e=>{if(e.data&&e.data.size)recChunks.push(e.data)};recMR.onstop=finishRec;recMR.start(1000);
+recOn=true;recN=0;$('#rec').style.display='block';say('Gravando… faça o sinal de novo para parar')}
+catch(e){recOn=false;say('Não foi possível gravar')}}
+function stopRec(){if(!recOn)return;recOn=false;$('#rec').style.display='none';try{recMR.stop()}catch(e){}say('Gravação salva')}
+function finishRec(){try{if(recDest){ao().disconnect(recDest);recDest=null}}catch(e){}
+const type=(recMR&&recMR.mimeType)||'video/webm';recBlob=new Blob(recChunks,{type});recChunks=[];
+const z=n=>String(n).padStart(2,'0'),d=new Date();recName='VisionSMR-'+d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes())+z(d.getSeconds())+'.'+(type.indexOf('mp4')>=0?'mp4':'webm');
+$('#sv').style.display='block';saveRec(false)}
+function saveRec(gesture){if(!recBlob)return;const file=new File([recBlob],recName,{type:recBlob.type});
+const dl=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(recBlob);a.download=recName;document.body.append(a);a.click();setTimeout(()=>a.remove(),1000)};
+if(gesture&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Gravação VisionS°MR'}).catch(dl)}else dl()}
+$('#sv').onclick=()=>saveRec(true);
 
 /* giroscópio */
 let haveOri=false,mode='arrastar tela',dyaw=0,dpit=0;
@@ -772,11 +806,11 @@ if(handOn){
 const pw=jp[0].distanceTo(jp[9])||.05,pd=jp[4].distanceTo(jp[8])/pw,
 fd=[8,12,16,20].reduce((a,i)=>a+jp[i].distanceTo(jp[0]),0)/4/pw;
 pinch=pinch?pd<.45:pd<.28;fist=fist?fd<1.5:fd<1.15;
-const pt=!pinch&&jp[8].distanceTo(jp[0])/pw>1.5&&[12,16,20].reduce((a,i)=>a+jp[i].distanceTo(jp[0]),0)/3/pw<1.3;if(pt)fist=false;
+const pt=!pinch&&jp[8].distanceTo(jp[0])/pw>1.5&&[12,16,20].reduce((a,i)=>a+jp[i].distanceTo(jp[0]),0)/3/pw<1.3;if(pt)fist=false;const lf=pt&&(jp[8].x-jp[5].x)<-.7*jp[8].distanceTo(jp[5]);if(lf){if(!recT)recT=now;if(now-recT>600&&now>recCool){recCool=now+2500;recT=0;toggleRec()}}else recT=0;
 const dW=i=>jp[i].distanceTo(jp[0])/pw,sh=!pinch&&dW(20)>1.4&&jp[4].distanceTo(jp[5])/pw>.75&&dW(8)<1.3&&dW(12)<1.3&&dW(16)<1.3&&jp[4].distanceTo(jp[20])/pw>1.4;
 if(sh){if(!shT)shT=now;if(now-shT>500&&now>shCool){shCool=now+2000;shT=0;toggleWorld()}}else shT=0;
 const gp=pinch?tmp.copy(jp[4]).add(jp[8]).multiplyScalar(.5).clone():fist?jp[9].clone():jp[8].clone();
-gesto=pinch?'pinça':fist?'punho':sh?'shaka':pt?'apontando':'aberta';
+gesto=pinch?'pinça':fist?'punho':sh?'shaka':lf?'gravar (esquerda)':pt?'apontando':'aberta';
 pinchL.visible=pd<.9;pinchL.position.copy(jp[4]).add(jp[8]).multiplyScalar(.5);tmp.copy(jp[8]).sub(jp[4]);pinchL.scale.y=Math.max(tmp.length(),1e-4);pinchL.quaternion.setFromUnitVectors(Y,tmp.normalize());pinchM.opacity=pinch?.95:.35;bead.visible=pinch;bead.position.copy(pinchL.position);if(pinch&&!pPrev){ripT=now;rip.position.copy(pinchL.position)}pPrev=pinch;
 hover=nearest(gp);pRay.copy(gp).normalize();
 if(pt&&zh.length>2){const mx=Math.max(...zh.map(a=>a[1])),last=zh[zh.length-1][1];
@@ -786,7 +820,7 @@ const c=pinch?0x5be07a:fist?0xffb347:0x8b7cf6;
 const sk=SKN[D.skin];if(sk){HC1.setHex(sk);HC2.setHex(sk).lerp(WH,.3).lerp(TC.setHex(c),.22);HC3.copy(HC2).lerp(WH,.2)}else{HC2.setHex(c);HC1.setHex(c).lerp(WH,.72);HC3.setHex(c).lerp(CY,.6)}glowM.color.setHex(c);pinchM.color.setHex(c);pu.col.value.setHex(c);silCol=pinch?'#5be07a':fist?'#ffb347':'#ffffff';auraM.color.setHex(c);HU.ss.value=sk?.45:0;rm.color.setHex(pinch?0x5be07a:fist?0xffb347:0xffffff);
 cur.position.copy(gp);cur.quaternion.setFromUnitVectors(Z,tmp.copy(gp).negate().normalize());
 cur.scale.setScalar((hover?1.35:1)*Math.max(.6,gp.length()/.45))
-}else{shT=0;gOn=false;if(!dragTouch)endDrag();grab=null;pinch=fist=false;gesto='—';hover=nearest(new V3(0,0,-1));pRay.set(0,0,-1)}
+}else{shT=0;recT=0;gOn=false;if(!dragTouch)endDrag();grab=null;pinch=fist=false;gesto='—';hover=nearest(new V3(0,0,-1));pRay.set(0,0,-1)}
 if(dragMode)dragStep();
 rayHit();
 items.forEach(g=>{const u=g.userData;let s=g===hover?1.1:1;
@@ -799,7 +833,7 @@ let rafId=0,fps=0,fc=0,ft=performance.now(),run=false;const diag=$('#diag');
 function frame(now){
 if(!xrOn)rafId=requestAnimationFrame(frame);if(!run)return;fc++;
 if(now-ft>500){fps=Math.round(fc*1000/(now-ft));fc=0;ft=now;diag.style.display=D.diag?'block':'none';
-if(D.diag)diag.textContent='FPS '+fps+'\nCâmera: '+camState+(camOn?' '+video.videoWidth+'x'+video.videoHeight:'')+'\nCabeça: '+mode+'\nMão: '+(!D.hand?'desligada':handOn?gesto:hands?'não detectada':handState)}
+if(D.diag)diag.textContent='FPS '+fps+'\nCâmera: '+camState+(camOn?' '+video.videoWidth+'x'+video.videoHeight:'')+'\nCabeça: '+mode+'\nMão: '+(!D.hand?'desligada':handOn?gesto:hands?'não detectada':handState)+(recOn?'\n● REC':'')}
 if(xrOn&&xrHave){head.quaternion.copy(xrQy).multiply(xrQ);head.position.copy(xrP).sub(xrP0).applyQuaternion(xrQy);mode='ARCore 6DOF'}
 else if(haveOri){head.quaternion.copy(qo).multiply(devQ());mode='giroscópio'}
 else{head.rotation.set(dpit,dyaw,0,'YXZ');mode='arrastar tela'}
@@ -846,6 +880,7 @@ for(let e=0;e<2;e++){const ew=e*w;R.setViewport(ew,0,w,PH);R.setScissor(ew,0,w,P
 if((camOn||xrCamOK)&&!vr)R.render(bgS,bgC);
 if(silShow&&!vr)R.render(silS,bgC);
 R.clearDepth();R.render(scene,E[e]);if(silShow&&vr)R.render(silS,bgC);R.clearDepth();R.render(hs,HC)}
+recFrame();
 R.setRenderTarget(null);R.setScissorTest(false);R.setViewport(0,0,PW,PH);R.clear();R.render(ds,bgC)}
 requestAnimationFrame(frame);
 

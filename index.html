@@ -39,7 +39,7 @@ select,button{font:inherit;padding:12px;border-radius:99px;background:var(--c);c
 <button id="rcam">Reiniciar câmera</button>
 <button id="sv" style="display:none">Salvar última gravação na galeria</button>
 <button id="go">Entrar</button>
-<p>Pinça, punho fechado ou cutucar com o indicador sobre um ícone abre o app. No Google, aponte para as letras do teclado e faça pinça ou cutuque. Com um app aberto, segure a pinça na barra branca e olhe para onde quer a janela, ou segure no círculo do canto e olhe para onde quer o canto. Faça 🤙 (shaka) por meio segundo para alternar entre a câmera e a piscina. Faça 👈 (indicador apontando para a esquerda) por meio segundo para começar a gravar a tela; faça de novo para parar e salvar. Sem mão: olhe para o ícone e toque na tela.</p></main>
+<p>Pinça, punho fechado ou cutucar com o indicador sobre um ícone abre o app. No Google, aponte para as letras do teclado e faça pinça ou cutuque. Com um app aberto, segure a pinça na barra branca e olhe para onde quer a janela, ou segure no círculo do canto e olhe para onde quer o canto. Faça 🤙 (shaka) por meio segundo para alternar entre a câmera e a piscina. Clique no app Gravação para gravar a tela e clique de novo para parar e salvar. Durante o jogo, faça 👈 (indicador para a esquerda) por meio segundo para começar ou parar. Sem mão: olhe para o ícone e toque na tela.</p></main>
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
@@ -153,8 +153,9 @@ Keynote:`<rect x="22" y="24" width="56" height="34" rx="5" fill="#fff"/><path d=
 Google:`<defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ea4335"/><stop offset=".32" stop-color="#ea4335"/><stop offset=".33" stop-color="#fbbc05"/><stop offset=".5" stop-color="#fbbc05"/><stop offset=".51" stop-color="#34a853"/><stop offset=".72" stop-color="#34a853"/><stop offset=".73" stop-color="#4285f4"/><stop offset="1" stop-color="#4285f4"/></linearGradient></defs><text x="50" y="72" font-size="74" font-weight="700" font-family="Arial,Helvetica,sans-serif" text-anchor="middle" fill="url(#gg)">G</text>`,
 Minecraft:mcSvg()};
 G['PINGᴾᴼᴺᴳ']=`<circle cx="42" cy="46" r="22" fill="#e53935" stroke="#fff" stroke-width="5"/><path d="M57 62 74 80" stroke="#fff" stroke-width="9" stroke-linecap="round"/><circle cx="73" cy="30" r="8" fill="#fff"/>`;
+G['Gravação']=`<circle cx="50" cy="50" r="30" fill="none" stroke="#fff" stroke-width="7"/><circle cx="50" cy="50" r="16" fill="#fff"/>`;
 const SVG=b=>{const i=new Image();i.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256">'+b+'</svg>');return i};
-const APPS=[['TV','#3a3a40','#0a0a0c'],['Music','#ff6b7a','#e0243f'],['Mindfulness','#6fe0c8','#3aa8c8'],['Settings','#9a9aa2','#5a5a62'],['Freeform','#ffffff','#e6eaf4'],['Safari','#4fb8ff','#1a6ae0'],['Photos','#ffffff','#eeeeee'],['Notes','#ffe066','#ffc400'],['App Store','#3fb0ff','#1a5be8'],['PINGᴾᴼᴺᴳ','#ff8a50','#e53935'],['Messages','#6af07a','#1ec24a'],['Minecraft','#6fb4e8','#3d7fc4'],['Google','#ffffff','#e8eaed']];
+const APPS=[['TV','#3a3a40','#0a0a0c'],['Music','#ff6b7a','#e0243f'],['Mindfulness','#6fe0c8','#3aa8c8'],['Settings','#9a9aa2','#5a5a62'],['Freeform','#ffffff','#e6eaf4'],['Safari','#4fb8ff','#1a6ae0'],['Photos','#ffffff','#eeeeee'],['Notes','#ffe066','#ffc400'],['App Store','#3fb0ff','#1a5be8'],['PINGᴾᴼᴺᴳ','#ff8a50','#e53935'],['Gravação','#ff453a','#9e1510'],['Minecraft','#6fb4e8','#3d7fc4'],['Google','#ffffff','#e8eaed']];
 const GL=mk(256,330,x=>{x.fillStyle='rgba(255,255,255,.12)';x.beginPath();x.arc(128,128,124,0,P2);x.fill()});
 const circ=(x,f)=>{x.beginPath();x.arc(128,128,112,0,P2);f()};
 const items=[];
@@ -469,7 +470,7 @@ x.fillStyle='rgba(255,255,255,.08)';[0,1,2].forEach(i=>{x.beginPath();x.roundRec
 AW.t.needsUpdate=true;
 applyWin();appw.visible=true}
 function closeApp(){appOpen=null;appw.visible=false;kb.visible=false;mcHide();ppStop()}
-function launch(g,dr){if(PP.on){ppClick(dr);return}if(appOpen==='Minecraft'&&mcFull){if(fsHover)setFull(false);return}if(appOpen){if(hoverH){if(hoverH===xb){closeApp();return}if(hoverH===fsb){setFull(true);return}if(dr&&handOn)startDrag(hoverH);else tapHandle(hoverH);return}if(appOpen==='Google')webClick();else if(appOpen!=='Minecraft')closeApp();return}if(!g)return;say('Abrindo '+g.userData.name+'… olhe à direita');g.userData.pulse=performance.now();openApp(g.userData.name)}
+function launch(g,dr){if(PP.on){ppClick(dr);return}if(appOpen==='Minecraft'&&mcFull){if(fsHover)setFull(false);return}if(appOpen){if(hoverH){if(hoverH===xb){closeApp();return}if(hoverH===fsb){setFull(true);return}if(dr&&handOn)startDrag(hoverH);else tapHandle(hoverH);return}if(appOpen==='Google')webClick();else if(appOpen!=='Minecraft')closeApp();return}if(!g)return;if(g.userData.name==='Gravação'){const t=performance.now();g.userData.pulse=t;if(t>recCool){recCool=t+1200;toggleRec()}return}say('Abrindo '+g.userData.name+'… olhe à direita');g.userData.pulse=performance.now();openApp(g.userData.name)}
 
 /* PINGᴾᴼᴺᴳ */
 const PNAME='PINGᴾᴼᴺᴳ',TW=.45,TL=.8,UP=new V3(0,1,0);
@@ -674,7 +675,7 @@ try{if(AC){recDest=AC.createMediaStreamDestination();ao().connect(recDest);recDe
 const mt=['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));
 recMR=new MediaRecorder(st,mt?{mimeType:mt,videoBitsPerSecond:4000000}:{videoBitsPerSecond:4000000});recChunks=[];
 recMR.ondataavailable=e=>{if(e.data&&e.data.size)recChunks.push(e.data)};recMR.onstop=finishRec;recMR.start(1000);
-recOn=true;recN=0;$('#rec').style.display='block';say('Gravando… faça o sinal de novo para parar')}
+recOn=true;recN=0;$('#rec').style.display='block';say('Gravando… clique em Gravação para parar')}
 catch(e){recOn=false;say('Não foi possível gravar')}}
 function stopRec(){if(!recOn)return;recOn=false;$('#rec').style.display='none';try{recMR.stop()}catch(e){}say('Gravação salva')}
 function finishRec(){try{if(recDest){ao().disconnect(recDest);recDest=null}}catch(e){}
